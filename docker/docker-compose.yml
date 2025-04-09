@@ -1,0 +1,152 @@
+version: '3.8'
+
+services:
+  # Servicio principal de backend
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/backend.Dockerfile
+    container_name: puerto-lima-backend
+    restart: unless-stopped
+    volumes:
+      - ../data:/app/data
+      - ../backend:/app/backend
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/puerto_lima
+      - OSRM_URL=http://osrm:5000
+      - MAPBOX_TOKEN=${MAPBOX_TOKEN}
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+      - osrm
+    networks:
+      - puerto-lima-network
+
+  # Frontend React
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/frontend.Dockerfile
+    container_name: puerto-lima-frontend
+    restart: unless-stopped
+    volumes:
+      - ../frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+      - REACT_APP_MAPBOX_TOKEN=${MAPBOX_TOKEN}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - puerto-lima-network
+
+  # Base de datos PostgreSQL con PostGIS
+  postgres:
+    image: postgis/postgis:15-3.3
+    container_name: puerto-lima-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=puerto_lima
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ../data/init_db:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - puerto-lima-network
+
+  # Servicio OSRM para cálculo de rutas
+  osrm:
+    build:
+      context: ..
+      dockerfile: docker/osrm.Dockerfile
+    container_name: puerto-lima-osrm
+    restart: unless-stopped
+    volumes:
+      - osrm-data:/data
+    ports:
+      - "5001:5000"
+    environment:
+      - OSRM_DATA_PATH=/data
+    networks:
+      - puerto-lima-network
+
+  # GeoServer para servicios GIS
+  geoserver:
+    build:
+      context: ..
+      dockerfile: docker/geoserver.Dockerfile
+    container_name: puerto-lima-geoserver
+    restart: unless-stopped
+    volumes:
+      - geoserver-data:/opt/geoserver/data_dir
+    ports:
+      - "8080:8080"
+    environment:
+      - INITIAL_MEMORY=1G
+      - MAXIMUM_MEMORY=2G
+    networks:
+      - puerto-lima-network
+
+  # Servicio MCP para cálculo de rutas (OSRM)
+  mcp-routes:
+    build:
+      context: ..
+      dockerfile: docker/backend.Dockerfile
+    container_name: puerto-lima-mcp-routes
+    restart: unless-stopped
+    command: python -m backend.mcp.routes_mcp --host 0.0.0.0 --port 5000
+    environment:
+      - OSRM_URL=http://osrm:5000
+    ports:
+      - "5010:5000"
+    depends_on:
+      - osrm
+    networks:
+      - puerto-lima-network
+
+  # Servicio MCP para visualización (Mapbox)
+  mcp-visualization:
+    build:
+      context: ..
+      dockerfile: docker/backend.Dockerfile
+    container_name: puerto-lima-mcp-viz
+    restart: unless-stopped
+    command: python -m backend.mcp.viz_mcp --host 0.0.0.0 --port 5000
+    volumes:
+      - ../data:/app/data
+    environment:
+      - MAPBOX_TOKEN=${MAPBOX_TOKEN}
+    ports:
+      - "5011:5000"
+    networks:
+      - puerto-lima-network
+
+  # Servicio MCP para análisis de sensibilidad
+  mcp-analysis:
+    build:
+      context: ..
+      dockerfile: docker/backend.Dockerfile
+    container_name: puerto-lima-mcp-analysis
+    restart: unless-stopped
+    command: python -m backend.mcp.analysis_mcp --host 0.0.0.0 --port 5000
+    ports:
+      - "5012:5000"
+    networks:
+      - puerto-lima-network
+
+networks:
+  puerto-lima-network:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  osrm-data:
+  geoserver-data:
