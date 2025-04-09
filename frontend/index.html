@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Puerto Lima - Comparación de Rutas de Exportación</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header / Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-ship me-2"></i>
+                Puerto Lima
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#"><i class="fas fa-home me-1"></i> Inicio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#acerca"><i class="fas fa-info-circle me-1"></i> Acerca de</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contacto"><i class="fas fa-envelope me-1"></i> Contacto</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-section py-5 bg-light">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-3">Optimiza tus Rutas de Exportación</h1>
+                    <p class="lead mb-4">
+                        Compara costos entre los puertos de Timbúes (Argentina) y Lima (Perú) para tomar la mejor decisión logística para tus exportaciones.
+                    </p>
+                    <a href="#calculadora" class="btn btn-primary btn-lg px-4 me-2">
+                        <i class="fas fa-calculator me-2"></i>Iniciar Cálculo
+                    </a>
+                    <a href="#acerca" class="btn btn-outline-secondary btn-lg px-4">
+                        <i class="fas fa-info-circle me-2"></i>Saber más
+                    </a>
+                </div>
+                <div class="col-lg-6 d-none d-lg-block">
+                    <img src="img/export-route-illustration.png" alt="Ilustración de rutas de exportación" class="img-fluid rounded shadow" onerror="this.onerror=null; this.src='https://via.placeholder.com/600x400?text=Puerto+Lima';">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calculadora Section -->
+    <section id="calculadora" class="py-5">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <h2 class="section-title">Calculadora de Rutas</h2>
+                    <p class="section-subtitle">Ingresa los datos de tu origen y carga para comparar opciones</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-5">
+                    <!-- Formulario de datos -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Datos de Origen y Carga</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="routeForm">
+                                <div class="mb-3">
+                                    <label for="originName" class="form-label">Nombre del Origen</label>
+                                    <input type="text" class="form-control" id="originName" required placeholder="Ej: Mendoza, Argentina">
+                                </div>
+                                
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <label for="originLat" class="form-label">Latitud</label>
+                                        <input type="number" step="0.000001" class="form-control" id="originLat" required placeholder="-32.889458">
+                                    </div>
+                                    <div class="col-6">
+                                        <label for="originLon" class="form-label">Longitud</label>
+                                        <input type="number" step="0.000001" class="form-control" id="originLon" required placeholder="-68.845839">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="selectLocation" class="form-label">O selecciona una ubicación predefinida</label>
+                                    <select class="form-select" id="selectLocation">
+                                        <option value="" selected>Seleccionar...</option>
+                                        <option value="-32.889458,-68.845839,Mendoza, Argentina">Mendoza, Argentina</option>
+                                        <option value="-33.447487,-70.673676,Santiago, Chile">Santiago, Chile</option>
+                                        <option value="-34.603722,-58.381592,Buenos Aires, Argentina">Buenos Aires, Argentina</option>
+                                        <option value="-25.595284,-54.578265,Ciudad del Este, Paraguay">Ciudad del Este, Paraguay</option>
+                                        <option value="-17.783325,-63.182126,Santa Cruz, Bolivia">Santa Cruz, Bolivia</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="tonnage" class="form-label">Cantidad (toneladas)</label>
+                                    <input type="number" min="1" step="0.1" class="form-control" id="tonnage" required placeholder="Ej: 1000">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="isContainer">
+                                        <label class="form-check-label" for="isContainer">Carga en contenedores</label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3" id="containerCountGroup" style="display: none;">
+                                    <label for="containerCount" class="form-label">Número de contenedores</label>
+                                    <input type="number" min="1" step="1" class="form-control" id="containerCount" placeholder="Ej: 10">
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary" id="calculateBtn">
+                                        <i class="fas fa-calculator me-2"></i>Calcular
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-7">
+                    <!-- Mapa -->
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-map-marked-alt me-2"></i>Mapa de Rutas</h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div id="map" style="height: 400px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Resultados Section (inicialmente oculto) -->
+    <section id="resultados" class="py-5 bg-light" style="display: none;">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <h2 class="section-title">Resultados del Análisis</h2>
+                    <p class="section-subtitle">Comparación detallada de costos y rutas</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Resumen -->
+                <div class="col-12 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Resumen del Análisis</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h4 id="resultSummaryTitle">Resulta más conveniente exportar por el puerto de <span id="optimalPort" class="fw-bold text-success">...</span></h4>
+                                    <p class="lead">El ahorro estimado es de <span id="savingsAmount" class="fw-bold">$0.00</span> (<span id="savingsPercentage">0%</span>) en comparación con la alternativa.</p>
+                                    <p>Origen: <span id="resultOrigin" class="fw-bold">...</span></p>
+                                    <p>Carga: <span id="resultTonnage" class="fw-bold">0</span> toneladas</p>
+                                </div>
+                                <div class="col-md-4 text-center d-flex align-items-center justify-content-center">
+                                    <a href="#" class="btn btn-outline-primary btn-lg" id="downloadReportBtn">
+                                        <i class="fas fa-file-pdf me-2"></i>Descargar Reporte
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Detalles de Costos -->
+                <div class="col-lg-7 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Comparación de Costos</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="costComparison" class="chart-container">
+                                <!-- Aquí se cargará la imagen del gráfico de comparación -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tabla de costos -->
+                <div class="col-lg-5 mb-4">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-table me-2"></i>Desglose de Costos</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Concepto</th>
+                                            <th class="text-end">Timbúes</th>
+                                            <th class="text-end">Lima</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Flete Terrestre</td>
+                                            <td class="text-end" id="costLandTimbues">$0.00</td>
+                                            <td class="text-end" id="costLandLima">$0.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Flete Marítimo</td>
+                                            <td class="text-end" id="costSeaTimbues">$0.00</td>
+                                            <td class="text-end" id="costSeaLima">$0.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Costos Fijos</td>
+                                            <td class="text-end" id="costFixedTimbues">$0.00</td>
+                                            <td class="text-end" id="costFixedLima">$0.00</td>
+                                        </tr>
+                                        <tr class="table-primary fw-bold">
+                                            <td>TOTAL</td>
+                                            <td class="text-end" id="costTotalTimbues">$0.00</td>
+                                            <td class="text-end" id="costTotalLima">$0.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Costo Unitario</td>
+                                            <td class="text-end" id="costUnitTimbues">$0.00</td>
+                                            <td class="text-end" id="costUnitLima">$0.00</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Desglose Timbúes -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Desglose Puerto Timbúes</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="timbuesCostBreakdown" class="chart-container">
+                                <!-- Aquí se cargará la imagen del gráfico -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desglose Lima -->
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Desglose Puerto Lima</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="limaCostBreakdown" class="chart-container">
+                                <!-- Aquí se cargará la imagen del gráfico -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Acerca de Section -->
+    <section id="acerca" class="py-5">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <h2 class="section-title">Acerca del Proyecto</h2>
+                    <p class="section-subtitle">Optimizando decisiones logísticas para la exportación</p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <h3>¿Por qué comparar puertos?</h3>
+                    <p>
+                        Las empresas exportadoras enfrentan decisiones críticas a la hora de seleccionar la ruta logística más eficiente para sus productos. 
+                        Los costos de transporte y servicios logísticos pueden representar una parte significativa del precio final del producto.
+                    </p>
+                    <p>
+                        Este proyecto ofrece una herramienta para comparar los costos totales de exportación utilizando dos rutas alternativas:
+                    </p>
+                    <ul>
+                        <li><strong>Ruta Argentina:</strong> Exportación a través del puerto de Timbúes en el río Paraná.</li>
+                        <li><strong>Ruta Pacífico:</strong> Exportación a través del puerto de Lima en Perú.</li>
+                    </ul>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <h3>Metodología de Cálculo</h3>
+                    <p>
+                        El sistema utiliza datos actualizados de costos de transporte terrestre, fletes marítimos y costos fijos portuarios para calcular el costo total de exportación para cada ruta.
+                    </p>
+                    <p>
+                        Los factores considerados incluyen:
+                    </p>
+                    <ul>
+                        <li>Distancia terrestre desde el origen hasta cada puerto</li>
+                        <li>Tarifas de flete terrestre por tonelada y kilómetro</li>
+                        <li>Tarifas de flete marítimo desde cada puerto hasta destinos internacionales</li>
+                        <li>Costos fijos de operación en cada puerto (tasas, servicios, etc.)</li>
+                        <li>Factores de corrección por calidad de infraestructura vial</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contacto Section -->
+    <section id="contacto" class="py-5 bg-light">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <h2 class="section-title">Contacto</h2>
+                    <p class="section-subtitle">¿Necesitas más información? Contáctanos</p>
+                </div>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <form id="contactForm">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="name" class="form-label">Nombre</label>
+                                        <input type="text" class="form-control" id="name" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" required>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="subject" class="form-label">Asunto</label>
+                                    <input type="text" class="form-control" id="subject" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="message" class="form-label">Mensaje</label>
+                                    <textarea class="form-control" id="message" rows="5" required></textarea>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-paper-plane me-2"></i>Enviar Mensaje
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5><i class="fas fa-ship me-2"></i>Puerto Lima</h5>
+                    <p>Sistema de comparación de alternativas de exportación</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <ul class="list-inline social-links">
+                        <li class="list-inline-item">
+                            <a href="#" class="text-white">
+                                <i class="fab fa-linkedin fa-lg"></i>
+                            </a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="#" class="text-white">
+                                <i class="fab fa-github fa-lg"></i>
+                            </a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="#" class="text-white">
+                                <i class="fab fa-twitter fa-lg"></i>
+                            </a>
+                        </li>
+                    </ul>
+                    <p class="mt-2">&copy; 2025 Puerto Lima. Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" style="display: none;">
+        <div class="spinner-container">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2 text-white">Calculando rutas y costos...</p>
+        </div>
+    </div>
+
+    <!-- JS Dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    <!-- App JS -->
+    <script src="js/app.js"></script>
+</body>
+</html>
