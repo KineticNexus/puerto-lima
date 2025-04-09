@@ -1,122 +1,113 @@
-# Puerto-Lima
+# Puerto Lima - Comparador de Rutas de Exportación
 
-Análisis comparativo de costos de exportación entre puertos Timbúes y Lima (Zárate).
-
-## Descripción
-
-Esta aplicación permite realizar un análisis detallado de costos logísticos para determinar la ruta de exportación más eficiente entre los puertos de Timbúes y Lima (Zárate) en Argentina. El sistema divide el territorio en sectores, calcula costos de transporte terrestre y marítimo, y genera visualizaciones de gradiente para identificar la línea divisoria de conveniencia entre ambos puertos.
+Este proyecto implementa un sistema de comparación de alternativas de exportación entre los puertos de Timbúes (Argentina) y Lima (Perú). La aplicación permite calcular y visualizar los costos de exportación para diferentes orígenes y cargas, ayudando a tomar decisiones logísticas óptimas.
 
 ## Características
 
-- División del territorio argentino en sectores para análisis granular
-- Cálculo preciso de distancias por rutas terrestres reales
-- Análisis de costos de flete terrestre y marítimo
-- Visualización de gradiente de preferencia entre puertos
-- Análisis de sensibilidad para evaluar robustez de las recomendaciones
-- Recomendaciones específicas para empresas exportadoras
-- Generación de reportes detallados en PDF
+- Cálculo de rutas óptimas utilizando OSRM (Open Source Routing Machine)
+- Comparación detallada de costos entre puertos alternativos
+- Visualización de rutas en mapas interactivos
+- Gráficos comparativos de costos
+- Generación de reportes PDF
+- Interfaz web responsiva
 
 ## Estructura del Proyecto
 
 ```
 puerto-lima/
-├── backend/               # Servidor backend con API REST y MCP
-│   ├── app.py             # Punto de entrada de la aplicación Flask
-│   ├── config/            # Configuraciones por ambiente
-│   ├── db/                # Modelos y conexión a base de datos
-│   ├── gis/               # Funcionalidades GIS
-│   │   ├── routes.py      # Cálculo de rutas (OSRM)
-│   │   └── sectors.py     # División territorial (PostGIS)
-│   ├── models/            # Modelos de datos
-│   ├── services/          # Lógica de negocio
-│   └── mcp/               # Integraciones MCP
-│       ├── routes_mcp.py  # MCP para cálculo de rutas
-│       ├── gis_mcp.py     # MCP para operaciones GIS
-│       ├── data_mcp.py    # MCP para datos empresariales
-│       ├── viz_mcp.py     # MCP para visualización
-│       ├── analysis_mcp.py# MCP para análisis de sensibilidad
-│       └── report_mcp.py  # MCP para generación de reportes
-├── frontend/              # Aplicación React para interfaz de usuario
-│   ├── public/            # Archivos estáticos
-│   ├── src/               # Código fuente React
-│   │   ├── components/    # Componentes reutilizables
-│   │   ├── pages/         # Páginas principales
-│   │   ├── hooks/         # Hooks personalizados
-│   │   ├── services/      # Servicios API y MCP
-│   │   └── utils/         # Utilidades generales
-│   └── package.json       # Dependencias
-├── data/                  # Datos para la aplicación
-│   ├── initial/           # Datos iniciales (script de carga)
-│   └── exports/           # Reportes exportados
-├── docker/                # Configuración Docker
-│   ├── docker-compose.yml # Orquestación de servicios
-│   ├── backend.Dockerfile # Dockerfile para backend
-│   ├── frontend.Dockerfile# Dockerfile para frontend
-│   ├── osrm.Dockerfile    # Dockerfile para servidor OSRM
-│   ├── postgis.Dockerfile # Dockerfile para PostgreSQL/PostGIS
-│   └── geoserver.Dockerfile # Dockerfile para GeoServer
-└── docs/                  # Documentación
-    ├── api.md             # Documentación de la API
-    ├── mcp.md             # Documentación de las integraciones MCP
-    └── user_manual.md     # Manual de usuario
+├── backend/                  # API y lógica de negocio
+│   ├── api/                  # Endpoints de la API
+│   │   └── endpoints/        # Definición de endpoints
+│   ├── config/               # Configuración
+│   └── utils/                # Utilidades
+│       ├── route_calculator.py   # Cálculo de rutas
+│       ├── cost_calculator.py    # Cálculo de costos
+│       ├── visualization.py      # Generación de visualizaciones
+│       └── report_generator.py   # Generación de reportes
+├── frontend/                 # Interfaz web
+│   ├── css/                  # Estilos
+│   ├── js/                   # Lógica JavaScript
+│   └── index.html            # Página principal
+└── README.md                 # Este archivo
 ```
 
-## Tecnologías
+## Requisitos
 
-- **Backend**: Python con Flask, SQLAlchemy
-- **Frontend**: React, Material-UI, Mapbox GL JS
-- **Base de datos**: PostgreSQL con extensión PostGIS
-- **GIS**: GeoServer, OSRM (Open Source Routing Machine)
-- **Reportes**: WeasyPrint
-- **Despliegue**: Docker, Docker Compose
-- **Integraciones MCP**:
-  - Cálculo de rutas (OSRM)
-  - Operaciones GIS (PostGIS/GeoServer)
-  - Manejo de datos (Supabase/PostgreSQL)
-  - Visualización (Mapbox)
-  - Análisis de sensibilidad (Python/NumPy)
-  - Generación de reportes (WeasyPrint)
+### Backend
+- Python 3.8+
+- FastAPI
+- Uvicorn
+- Pandas
+- Matplotlib
+- Folium
+- WeasyPrint
+- Polyline
+- Requests
 
-## Configuración y Ejecución
+### Frontend
+- Navegador web moderno
+- Conexión a Internet (para cargar mapas y CDNs)
 
-### Requisitos
-- Docker y Docker Compose
-- Node.js 16+ (desarrollo frontend)
-- Python 3.9+ (desarrollo backend)
-
-### Instalación y Ejecución
+## Instalación
 
 1. Clonar el repositorio:
-```bash
-git clone https://github.com/KineticNexus/puerto-lima.git
-cd puerto-lima
-```
+   ```bash
+   git clone https://github.com/KineticNexus/puerto-lima.git
+   cd puerto-lima
+   ```
 
-2. Ejecutar con Docker Compose:
-```bash
-docker-compose -f docker/docker-compose.yml up
-```
+2. Crear un entorno virtual e instalar dependencias:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # En Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
 
-3. Acceder a la aplicación:
-- Frontend: http://localhost:3000
-- API Backend: http://localhost:5000
-- Documentación API: http://localhost:5000/docs
+3. Ejecutar el backend:
+   ```bash
+   cd backend
+   uvicorn main:app --reload
+   ```
 
-## Configuración de Variables
+4. Abrir el frontend:
+   - Opción 1: Abrir `frontend/index.html` directamente en su navegador
+   - Opción 2: Usar un servidor web simple
+     ```bash
+     # Desde la carpeta raíz
+     cd frontend
+     python -m http.server 8080
+     ```
+     Luego acceder a http://localhost:8080
 
-Las variables del modelo se pueden configurar a través de la interfaz gráfica o modificando los archivos de configuración:
+## Uso
 
-- `backend/config/default.py`: Variables por defecto
-- `backend/config/production.py`: Sobrescrituras para producción
+1. Acceder a la aplicación web
+2. Ingresar el nombre del origen y las coordenadas (o seleccionar una ubicación predefinida)
+3. Especificar la cantidad de carga en toneladas
+4. Hacer clic en "Calcular"
+5. Revisar los resultados en los gráficos y tablas
+6. Opcionalmente, descargar un reporte PDF completo
 
-Variables principales configurables:
-- Costos de flete terrestre (USD/ton/km)
-- Fletes marítimos por destino
-- Factores de corrección de ruta
-- Costos adicionales por puerto
-- Rendimientos por región
-- Proporción de uso de tierra
+## API Endpoints
+
+- `GET /api/` - Verificar que la API está funcionando
+- `POST /api/route/calcular` - Calcular rutas y costos
+- `POST /api/route/reporte` - Generar reporte PDF
+
+## Configuración
+
+Los parámetros principales de la aplicación se pueden configurar en el archivo `backend/config/default.py`:
+
+- Coordenadas de los puertos
+- Tarifas de fletes marítimos y terrestres
+- Costos fijos portuarios
+- Factores de corrección para rutas
+- Configuración de visualización
 
 ## Licencia
 
-MIT
+[MIT](LICENSE)
+
+## Contacto
+
+Para consultas o soporte, contáctenos a través de GitHub o email.
